@@ -24,7 +24,7 @@ def index(request):
     return Response(courses)
 
 
-@api_view(['GET','POST'])
+@api_view(['GET','POST','PUT','PATCH'])
 def person(request):
     #serializing -> from queryset to json
     if request.method =="GET":
@@ -39,6 +39,23 @@ def person(request):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+    
+    #update to databse , in here, you also pass the object
+    elif request.method =="PUT":
+        serializer = PeopleSerializer(Person.objects.get(id=request.data['id']),data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    #update to databse , in here, you also pass the object difference with PUT is that partial update is allowed
+    elif request.method =="PATCH":
+        serializer = PeopleSerializer(Person.objects.get(id=request.data['id']),partial=True,data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+
 
     
 
