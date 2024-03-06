@@ -24,7 +24,7 @@ def index(request):
     return Response(courses)
 
 
-@api_view(['GET','POST','PUT','PATCH'])
+@api_view(['GET','POST','PUT','PATCH','DELETE'])
 def person(request):
     #serializing -> from queryset to json
     if request.method =="GET":
@@ -55,6 +55,10 @@ def person(request):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+    # no need of serializer here
+    elif request.method =="DELETE":
+        Person.objects.get(id=request.data['id']).delete()
+        return Response({"message":"id deleted"})
 
 
     
