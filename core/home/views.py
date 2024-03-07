@@ -5,6 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, schema
 from home.serializers import PeopleSerializer
+from django.shortcuts import get_object_or_404
+# from myapps.serializers import UserSerializer
+from rest_framework import viewsets
+from rest_framework.response import Response
+
 @api_view(['GET','POST'])
 def index(request):
     if request.method =="GET":
@@ -99,3 +104,26 @@ class PersonAPI(APIView):
         Person.objects.get(id=request.data['id']).delete()
         return Response({"message":"id deleted"})
 
+################################
+#   Model Viewset
+################################  
+
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+# from myapps.serializers import UserSerializer
+from rest_framework import viewsets
+from rest_framework.response import Response
+class PeopleViewset(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing user instances.
+    """
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+    def list(self,request):
+        queryset=self.queryset
+        if request.GET.get('search'):
+            queryset= self.queryset.filter(name__startswith=request.GET.get('search'))
+
+        searielizer= PeopleSerializer(queryset,many=True)
+        return Response(searielizer.data)
