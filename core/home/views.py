@@ -29,7 +29,7 @@ def person(request):
     #serializing -> from queryset to json
     if request.method =="GET":
         
-        serializer = PeopleSerializer(Person.objects.all(),many=True)
+        serializer = PeopleSerializer(Person.objects.filter(company__isnull=False),many=True)
         return Response(serializer.data)
     
     #Deserializer -> from json to queryset
@@ -61,5 +61,41 @@ def person(request):
         return Response({"message":"id deleted"})
 
 
+################################
+#   CBV
+################################  
     
+from rest_framework.views import APIView
+
+
+class PersonAPI(APIView):
+
+    def get(self,request):
+        serializer = PeopleSerializer(Person.objects.filter(company__isnull=False),many=True)
+        return Response(serializer.data)
+    
+    def post(self,request):
+        serializer = PeopleSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    def put(self,request):
+        serializer = PeopleSerializer(Person.objects.get(id=request.data['id']),data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    def patch(self,request):
+        serializer = PeopleSerializer(Person.objects.get(id=request.data['id']),partial=True,data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    def delete(self,request):
+        Person.objects.get(id=request.data['id']).delete()
+        return Response({"message":"id deleted"})
 
